@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TestingProject.Application.DTOs;
 using TestingProject.Application.Interfaces;
-using TestingProject.Domain.Entities;
 
 namespace TestingProject.Controllers;
 
@@ -15,7 +15,6 @@ public class ProductsController : ControllerBase
         _productService = productService;
     }
 
-    // GET: api/products
     [HttpGet]
     public async Task<IActionResult> GetAllProducts()
     {
@@ -23,7 +22,6 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
-    // GET: api/products/1
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProductById(int id)
     {
@@ -33,24 +31,20 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
-    // POST: api/products
     [HttpPost]
-    public async Task<IActionResult> AddProduct(Product product)
+    public async Task<IActionResult> AddProduct(CreateProductDTO productDTO)
     {
-        await _productService.AddProduct(product);
+        await _productService.AddProduct(productDTO);
         return Ok("Product added successfully!");
     }
 
-    // PUT: api/products/1
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProduct(int id, Product product)
+    public async Task<IActionResult> UpdateProduct(int id, CreateProductDTO productDTO)
     {
-        product.Id = id;
-        await _productService.UpdateProduct(product);
+        await _productService.UpdateProduct(id, productDTO);
         return Ok("Product updated successfully!");
     }
 
-    // DELETE: api/products/1
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(int id)
     {

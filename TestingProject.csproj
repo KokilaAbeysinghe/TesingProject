@@ -20,10 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Middleware\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\TestingProject.Application\TestingProject.Application.csproj" />
     <ProjectReference Include="..\TestingProject.Domain\TestingProject.Domain.csproj" />
     <ProjectReference Include="..\TestingProject.Infrastructure\TestingProject.Infrastructure.csproj" />

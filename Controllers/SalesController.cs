@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TestingProject.Application.DTOs;
 using TestingProject.Application.Interfaces;
-using TestingProject.Domain.Entities;
 
 namespace TestingProject.Controllers;
 
@@ -15,7 +15,6 @@ public class SalesController : ControllerBase
         _saleService = saleService;
     }
 
-    // GET: api/sales
     [HttpGet]
     public async Task<IActionResult> GetAllSales()
     {
@@ -23,7 +22,6 @@ public class SalesController : ControllerBase
         return Ok(sales);
     }
 
-    // GET: api/sales/1
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSaleById(int id)
     {
@@ -33,15 +31,13 @@ public class SalesController : ControllerBase
         return Ok(sale);
     }
 
-    // POST: api/sales
     [HttpPost]
-    public async Task<IActionResult> CreateSale(Sale sale)
+    public async Task<IActionResult> CreateSale(CreateSaleDTO saleDTO)
     {
-        await _saleService.CreateSale(sale);
+        await _saleService.CreateSale(saleDTO);
         return Ok("Sale created successfully!");
     }
 
-    // GET: api/sales/1/total
     [HttpGet("{id}/total")]
     public async Task<IActionResult> CalculateTotal(int id)
     {
