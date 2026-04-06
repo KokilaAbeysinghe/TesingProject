@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="../TestingProject.Application/TestingProject.Application.csproj" />
+  <Project Path="../TestingProject.Domain/TestingProject.Domain.csproj" />
+  <Project Path="../TestingProject.Infrastructure/TestingProject.Infrastructure.csproj" />
+  <Project Path="TestingProject.csproj" />
+</Solution>
