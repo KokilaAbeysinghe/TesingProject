@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.EntityFrameworkCore;
-using TestingProject.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
 using TestingProject.Domain.Entities;
 using TestingProject.Infrastructure.Data;
+using TestingProject.Application.Interfaces;
 
 namespace TestingProject.Infrastructure.Repositories;
 

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TestingProject.Application.DTOs;
+﻿namespace TestingProject.Application.DTOs;
 
 public class SaleDTO
 {

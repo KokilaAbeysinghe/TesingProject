@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TestingProject.Application.Interfaces;
+
 using TestingProject.Domain.Entities;
 using TestingProject.Infrastructure.Data;
 

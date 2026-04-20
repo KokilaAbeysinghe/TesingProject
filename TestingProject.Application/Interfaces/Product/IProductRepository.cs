@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using TestingProject.Domain.Entities;
+﻿using TestingProject.Domain.Entities;
 
 namespace TestingProject.Application.Interfaces;
 
