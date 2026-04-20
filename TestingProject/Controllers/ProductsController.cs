@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TestingProject.Application.DTOs;
 using TestingProject.Application.Interfaces;
+using TestingProject.Application.DTOs;
 
 namespace TestingProject.Controllers;
 

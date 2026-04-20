@@ -1,8 +1,8 @@
-﻿namespace TestingProject.Domain.Entities;
+﻿namespace TestingProject.Application.DTOs;
 
-public class Customer
+public class CustomerDTO
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
-}
+   }

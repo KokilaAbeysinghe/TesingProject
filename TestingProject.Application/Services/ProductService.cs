@@ -1,6 +1,6 @@
 ﻿using TestingProject.Application.DTOs;
-using TestingProject.Application.Interfaces;
 using TestingProject.Domain.Entities;
+using TestingProject.Application.Interfaces;
 
 namespace TestingProject.Application.Services;
 
