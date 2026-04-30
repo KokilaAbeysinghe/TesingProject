@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TestingProject.Application.Interfaces;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TestingProject.Application.DTOs;
+using TestingProject.Application.Interfaces;
 
 namespace TestingProject.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
@@ -32,6 +34,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> AddProduct(CreateProductDTO productDTO)
     {
         await _productService.AddProduct(productDTO);
@@ -46,6 +49,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
         await _productService.DeleteProduct(id);
