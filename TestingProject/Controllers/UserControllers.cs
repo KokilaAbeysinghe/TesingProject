@@ -8,11 +8,11 @@ namespace TestingProject.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 
-public class UserContollers : ControllerBase
+public class UserControllers : ControllerBase
 {
     private readonly IUserService _userService;
     
-    public UserContollers(IUserService userService)
+    public UserControllers(IUserService userService)
     {
         _userService = userService;
     }
