@@ -21,7 +21,7 @@ public class ProductCategoryRepository : IProductCategoryRepository
             .ToListAsync();
     }
 
-    public async Task<ProductCategory> GetCategoryById(int id)
+    public async Task<ProductCategory?> GetCategoryById(int id)
     {
         return await _context.ProductCategories
             .Include(c => c.Products)

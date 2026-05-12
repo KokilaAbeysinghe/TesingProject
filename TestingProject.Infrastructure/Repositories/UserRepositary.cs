@@ -46,6 +46,8 @@ public class UserRepository : IUserRepository
 
         existing.Name = user.Name;
         existing.Email = user.Email;
+        existing.ContactNumber = user.ContactNumber;
+       
 
         await _context.SaveChangesAsync();
     }

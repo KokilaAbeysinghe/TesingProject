@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TestingProject.Application.Interfaces;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TestingProject.Application.DTOs;
-
+using TestingProject.Application.Interfaces;
 
 namespace TestingProject.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-
 public class UserControllers : ControllerBase
 {
     private readonly IUserService _userService;
@@ -44,10 +44,6 @@ public class UserControllers : ControllerBase
             await _userService.DeleteUser(id);
             return Ok("User deleted successfully!");
         }
-
-
-
-
 
 
 

@@ -1,6 +1,7 @@
-﻿using TestingProject.Application.Interfaces;
+﻿using TestingProject.Application.DTOs;
+using TestingProject.Application.Interfaces;
+using TestingProject.Application.Interfaces.Password;
 using TestingProject.Domain.Entities;
-using TestingProject.Application.DTOs;
 
 
 namespace TestingProject.Application.Services
@@ -8,10 +9,12 @@ namespace TestingProject.Application.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IPasswordHashingService _passwordHashingService;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository,IPasswordHashingService passwordHashingService)
         {
             _userRepository = userRepository;
+            _passwordHashingService = passwordHashingService;
         }
 
         public async Task<UserDTO> GetUserById(int id)
@@ -37,6 +40,8 @@ namespace TestingProject.Application.Services
                 Name = userDTO.Name,
                 Email = userDTO.Email,
                 ContactNumber = userDTO.ContactNumber,
+                Role = string.IsNullOrWhiteSpace(userDTO.Role) ? "Cashier" : userDTO.Role,
+                PasswordHash = _passwordHashingService.HashPassword(userDTO.Password)
             };
             await _userRepository.AddUser(user);
         }

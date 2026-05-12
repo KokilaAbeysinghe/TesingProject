@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TestingProject.Application.Interfaces;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TestingProject.Application.DTOs;
+using TestingProject.Application.Interfaces;
 
 namespace TestingProject.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class SalesController : ControllerBase

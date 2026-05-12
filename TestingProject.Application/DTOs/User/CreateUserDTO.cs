@@ -19,4 +19,9 @@ public class CreateUserDTO
     [Required(ErrorMessage = "User ContactNumber is required!")]
     [StringLength(10, ErrorMessage = "ContactNumber cannot exceed 10 characters!")]
     public string ContactNumber { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Password is required!")]
+    [MinLength(8, ErrorMessage = "Password must be at least 8 characters!")]
+    public string Password { get; set; } = string.Empty;
+    public string Role { get; set; } = "Cashier";
 }

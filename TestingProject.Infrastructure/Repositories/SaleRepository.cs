@@ -23,7 +23,7 @@ public class SaleRepository : ISaleRepository
             .ToListAsync();
     }
 
-    public async Task<Sale> GetSaleById(int id)
+    public async Task<Sale?> GetSaleById(int id)
     {
         return await _context.Sales
             .Include(s => s.Customer)

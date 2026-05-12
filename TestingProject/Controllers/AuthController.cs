@@ -11,7 +11,7 @@ namespace TestingProject.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _auth;
-
+    
     public AuthController(IAuthService auth)
     {
         _auth = auth;
