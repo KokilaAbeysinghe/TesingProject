@@ -37,7 +37,8 @@ public class SaleService : ISaleService
     public async Task<SaleDTO> GetSaleById(int id)
     {
         var sale = await _saleRepository.GetSaleById(id);
-        if (sale == null) return null!;
+        if (sale is null)
+            throw new KeyNotFoundException($"Sale with ID {id} not found.");
         return new SaleDTO
         {
             Id = sale.Id,
@@ -65,6 +66,10 @@ public class SaleService : ISaleService
             if (product is null)
                 throw new KeyNotFoundException($"Product with ID {item.ProductId} not found.");
 
+            if (product.Stock < item.Quantity)
+                throw new InvalidOperationException(
+                    $"Insufficient stock for '{product.Name}'. Available: {product.Stock}, Requested: {item.Quantity}.");
+
             saleItems.Add(new SaleItem
             {
                 ProductId = item.ProductId,
@@ -82,6 +87,12 @@ public class SaleService : ISaleService
         };
 
         await _saleRepository.CreateSale(sale);
+
+        foreach (var item in saleDTO.SaleItems)
+        {
+            var product = await _productRepository.GetProductById(item.ProductId);
+            await _productRepository.UpdateStock(item.ProductId, product!.Stock - item.Quantity);
+        }
     }
 
     public async Task<decimal> CalculateTotal(int saleId)

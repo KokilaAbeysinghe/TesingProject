@@ -9,7 +9,8 @@ public class CreateProductDTO
     public string Name { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Category is required!")]
-    public string Category { get; set; } = string.Empty;
+
+    public int ProductCategoryId { get; set; }
 
     [Required]
     [Range(0.01, 999999, ErrorMessage = "Price must be greater than 0!")]

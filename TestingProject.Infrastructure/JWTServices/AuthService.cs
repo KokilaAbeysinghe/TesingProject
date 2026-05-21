@@ -21,12 +21,12 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDTO> Register(RegisterRequestDTO request)
     {
-        // 1. Check email not already taken
+        
         var existing = await _users.GetUserByEmail(request.Email);
         if (existing != null)
             throw new InvalidOperationException("Email is already registered.");
 
-        // 2. Build the user entity
+        
         var user = new User
         {
             Name = request.Name,
@@ -35,11 +35,11 @@ public class AuthService : IAuthService
             Role = string.IsNullOrWhiteSpace(request.Role) ? "Cashier" : request.Role,
         };
 
-        // 3. Hash the password and save
+        
         user.PasswordHash = _hasher.HashPassword(user, request.Password);
         await _users.AddUser(user);
 
-        // 4. Issue token
+        
         var (token, expiresAtUtc) = _jwt.CreateAccessToken(user);
         return new AuthResponseDTO
         {
@@ -53,17 +53,17 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDTO> Login(LoginRequestDTO request)
     {
-        // 1. Find user by email
+       
         var user = await _users.GetUserByEmail(request.Email);
         if (user == null)
             throw new UnauthorizedAccessException("Invalid email or password.");
 
-        // 2. Verify password hash
+        
         var result = _hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
         if (result == PasswordVerificationResult.Failed)
             throw new UnauthorizedAccessException("Invalid email or password.");
 
-        // 3. Issue token
+       
         var (token, expiresAtUtc) = _jwt.CreateAccessToken(user);
         return new AuthResponseDTO
         {

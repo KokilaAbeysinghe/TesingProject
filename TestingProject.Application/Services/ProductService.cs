@@ -20,7 +20,8 @@ public class ProductService : IProductService
         {
             Id = p.Id,
             Name = p.Name,
-            Category = p.Category,
+            ProductCategoryId = p.ProductCategoryId ?? 0,
+            CategoryName = p.ProductCategory?.Name ?? string.Empty,
             Price = p.Price,
             Stock = p.Stock
         }).ToList();
@@ -37,10 +38,12 @@ public class ProductService : IProductService
         {
             Id = product.Id,
             Name = product.Name,
-            Category = product.Category,
+            ProductCategoryId = product.ProductCategoryId ?? 0,
+            CategoryName = product.ProductCategory?.Name ?? string.Empty,
             Price = product.Price,
             Stock = product.Stock
         };
+   
     }
 
     public async Task AddProduct(CreateProductDTO productDTO)
@@ -48,7 +51,7 @@ public class ProductService : IProductService
         var product = new Product
         {
             Name = productDTO.Name,
-            Category = productDTO.Category,
+            ProductCategoryId = productDTO.ProductCategoryId,
             Price = productDTO.Price,
             Stock = productDTO.Stock
         };
@@ -59,9 +62,8 @@ public class ProductService : IProductService
     {
         var product = new Product
         {
-            Id = id,
             Name = productDTO.Name,
-            Category = productDTO.Category,
+            ProductCategoryId = productDTO.ProductCategoryId,
             Price = productDTO.Price,
             Stock = productDTO.Stock
         };
