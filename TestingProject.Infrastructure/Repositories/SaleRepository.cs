@@ -37,4 +37,14 @@ public class SaleRepository : ISaleRepository
         await _context.Sales.AddAsync(sale);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<Sale>> GetSalesBetweenDates(DateTime startDate, DateTime endDate)
+    {
+        return await _context.Sales
+            .Include(s => s.Customer)
+            .Include(s => s.SaleItems)
+            .ThenInclude(si => si.Product)
+            .Where(s => s.SaleDate >= startDate && s.SaleDate < endDate)
+            .ToListAsync();
+    }
 }
