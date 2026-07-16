@@ -32,7 +32,7 @@ public class AuthService : IAuthService
             Name = request.Name,
             Email = request.Email,
             ContactNumber = request.ContactNumber,
-            Role = string.IsNullOrWhiteSpace(request.Role) ? "Cashier" : request.Role,
+            Role = "Cashier",
         };
 
         

@@ -40,14 +40,15 @@ public class UserRepository : IUserRepository
     {
         var existing = await _context.Users.FindAsync(user.Id);
 
-        if (existing == null)
+        if (existing is null)
             throw new KeyNotFoundException(
                 $"User with ID {user.Id} not found!");
 
         existing.Name = user.Name;
         existing.Email = user.Email;
         existing.ContactNumber = user.ContactNumber;
-       
+        existing.Role = user.Role;
+        existing.PasswordHash = user.PasswordHash;
 
         await _context.SaveChangesAsync();
     }
@@ -56,7 +57,7 @@ public class UserRepository : IUserRepository
     {
         var user = await _context.Users.FindAsync(id);
 
-        if (user == null)
+        if (user is null)
             throw new KeyNotFoundException(
                 $"User with ID {id} not found!");
 
