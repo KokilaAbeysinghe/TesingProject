@@ -70,6 +70,32 @@ public class ProductService : IProductService
         await _productRepository.UpdateProduct(product);
     }
 
+    public async Task AdjustStock(int id, AdjustStockDTO adjustStockDTO)
+    {
+        var product = await _productRepository.GetProductById(id);
+
+        if (product is null)
+            throw new KeyNotFoundException($"Product with ID {id} not found!");
+
+        var adjustmentType = adjustStockDTO.AdjustmentType?.Trim();
+
+        if (!string.Equals(adjustmentType, "Add", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(adjustmentType, "Remove", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Adjustment type must be Add or Remove.");
+        }
+
+        var newStock = string.Equals(adjustmentType, "Add", StringComparison.OrdinalIgnoreCase)
+            ? product.Stock + adjustStockDTO.Quantity
+            : product.Stock - adjustStockDTO.Quantity;
+
+        if (newStock < 0)
+            throw new InvalidOperationException($"Cannot remove {adjustStockDTO.Quantity} unit(s). Only {product.Stock} in stock.");
+
+        await _productRepository.UpdateStock(id, newStock);
+    }
+
+
     public async Task DeleteProduct(int id)
     {
         await _productRepository.DeleteProduct(id);

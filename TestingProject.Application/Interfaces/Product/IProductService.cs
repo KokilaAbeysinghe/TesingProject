@@ -1,5 +1,4 @@
-﻿
-using TestingProject.Application.DTOs;
+﻿using TestingProject.Application.DTOs;
 
 namespace TestingProject.Application.Interfaces;
 
@@ -9,5 +8,6 @@ public interface IProductService
     Task<ProductDTO> GetProductById(int id);
     Task AddProduct(CreateProductDTO productDTO);
     Task UpdateProduct(int id, CreateProductDTO productDTO);
+    Task AdjustStock(int id, AdjustStockDTO adjustStockDTO);
     Task DeleteProduct(int id);
 }

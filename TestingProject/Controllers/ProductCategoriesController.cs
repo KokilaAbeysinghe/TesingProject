@@ -38,7 +38,7 @@ public class ProductCategoriesController : ControllerBase
     public async Task<IActionResult> AddCategory(CreateProductCategoryDTO categoryDTO)
     {
         await _categoryService.AddCategory(categoryDTO);
-        return Ok("Category added successfully!");
+        return Ok(new { message = "Category added successfully!" });
     }
 
     // PUT: api/productcategories/1
@@ -46,7 +46,7 @@ public class ProductCategoriesController : ControllerBase
     public async Task<IActionResult> UpdateCategory(int id, CreateProductCategoryDTO categoryDTO)
     {
         await _categoryService.UpdateCategory(id, categoryDTO);
-        return Ok("Category updated successfully!");
+        return Ok(new { message = "Category updated successfully!" });
     }
 
     // DELETE: api/productcategories/1
@@ -54,6 +54,6 @@ public class ProductCategoriesController : ControllerBase
     public async Task<IActionResult> DeleteCategory(int id)
     {
         await _categoryService.DeleteCategory(id);
-        return Ok("Category deleted successfully!");
+        return Ok(new { message = "Category deleted successfully!" });
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TestingProject.Domain.Entities;
 
-namespace TestingProject.Infrastructure.Data;
+namespace TestingProject.Infrastructure.Data; 
 
 public class AppDbContext : DbContext
 {
@@ -17,4 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<SaleItem> SaleItems { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<ProductCategory> ProductCategories { get; set; }
+    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<Purchase> Purchases { get; set; }
+    public DbSet<PurchaseItem> PurchaseItems { get; set; }
 }

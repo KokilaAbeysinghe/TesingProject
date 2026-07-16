@@ -38,6 +38,12 @@ public class SaleRepository : ISaleRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task UpdateSale(Sale sale)
+    {
+        _context.Sales.Update(sale);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<List<Sale>> GetSalesBetweenDates(DateTime startDate, DateTime endDate)
     {
         return await _context.Sales

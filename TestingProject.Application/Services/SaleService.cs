@@ -1,4 +1,5 @@
 ﻿using TestingProject.Domain.Entities;
+using TestingProject.Domain.Enums;
 using TestingProject.Application.Interfaces;
 using TestingProject.Application.DTOs;
 
@@ -22,8 +23,11 @@ public class SaleService : ISaleService
         {
             Id = s.Id,
             SaleDate = s.SaleDate,
+            CustomerId = s.CustomerId,
             CustomerName = s.Customer.Name,
             TotalAmount = s.TotalAmount,
+            PaymentMethod = s.PaymentMethod,
+            Status = s.Status,
             SaleItems = s.SaleItems.Select(si => new SaleItemDTO
             {
                 ProductId = si.ProductId,
@@ -43,8 +47,11 @@ public class SaleService : ISaleService
         {
             Id = sale.Id,
             SaleDate = sale.SaleDate,
+            CustomerId = sale.CustomerId,
             CustomerName = sale.Customer.Name,
             TotalAmount = sale.TotalAmount,
+            PaymentMethod = sale.PaymentMethod,
+            Status = sale.Status,
             SaleItems = sale.SaleItems.Select(si => new SaleItemDTO
             {
                 ProductId = si.ProductId,
@@ -83,7 +90,8 @@ public class SaleService : ISaleService
             CustomerId = saleDTO.CustomerId,
             SaleDate = DateTime.UtcNow,
             SaleItems = saleItems,
-            TotalAmount = saleItems.Sum(si => si.UnitPrice * si.Quantity)
+            TotalAmount = saleItems.Sum(si => si.UnitPrice * si.Quantity),
+            PaymentMethod = saleDTO.PaymentMethod
         };
 
         await _saleRepository.CreateSale(sale);
@@ -93,6 +101,45 @@ public class SaleService : ISaleService
             var product = await _productRepository.GetProductById(item.ProductId);
             await _productRepository.UpdateStock(item.ProductId, product!.Stock - item.Quantity);
         }
+    }
+
+    public async Task UpdateSale(int id, UpdateSaleDTO saleDTO)
+    {
+        var sale = await _saleRepository.GetSaleById(id);
+
+        if (sale is null)
+            throw new KeyNotFoundException($"Sale with ID {id} not found.");
+
+        if (sale.Status == SaleStatus.Voided)
+            throw new InvalidOperationException("A voided sale cannot be edited.");
+
+        sale.CustomerId = saleDTO.CustomerId;
+        sale.PaymentMethod = saleDTO.PaymentMethod;
+
+        await _saleRepository.UpdateSale(sale);
+    }
+
+    public async Task VoidSale(int id)
+    {
+        var sale = await _saleRepository.GetSaleById(id);
+
+        if (sale is null)
+            throw new KeyNotFoundException($"Sale with ID {id} not found.");
+
+        if (sale.Status == SaleStatus.Voided)
+            throw new InvalidOperationException("Sale is already voided.");
+
+        foreach (var item in sale.SaleItems)
+        {
+            var product = await _productRepository.GetProductById(item.ProductId);
+
+            if (product is not null)
+                await _productRepository.UpdateStock(item.ProductId, product.Stock + item.Quantity);
+        }
+
+        sale.Status = SaleStatus.Voided;
+
+        await _saleRepository.UpdateSale(sale);
     }
 
     public async Task<decimal> CalculateTotal(int saleId)

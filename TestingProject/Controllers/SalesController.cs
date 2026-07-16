@@ -37,7 +37,7 @@ public class SalesController : ControllerBase
     public async Task<IActionResult> CreateSale(CreateSaleDTO saleDTO)
     {
         await _saleService.CreateSale(saleDTO);
-        return Ok("Sale created successfully!");
+        return Ok(new { message = "Sale created successfully!" });
     }
 
     [HttpGet("{id}/total")]
@@ -45,5 +45,21 @@ public class SalesController : ControllerBase
     {
         var total = await _saleService.CalculateTotal(id);
         return Ok(new { SaleId = id, Total = total });
+    }
+
+    [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> UpdateSale(int id, UpdateSaleDTO saleDTO)
+    {
+        await _saleService.UpdateSale(id, saleDTO);
+        return Ok(new { message = "Sale updated successfully!" });
+    }
+
+    [HttpPost("{id}/void")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> VoidSale(int id)
+    {
+        await _saleService.VoidSale(id);
+        return Ok(new { message = "Sale voided successfully!" });
     }
 }

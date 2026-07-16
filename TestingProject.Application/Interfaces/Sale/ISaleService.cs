@@ -7,5 +7,7 @@ public interface ISaleService
     Task<List<SaleDTO>> GetAllSales();
     Task<SaleDTO> GetSaleById(int id);
     Task CreateSale(CreateSaleDTO saleDTO);
+    Task UpdateSale(int id, UpdateSaleDTO saleDTO);
+    Task VoidSale(int id);
     Task<decimal> CalculateTotal(int saleId);
 }

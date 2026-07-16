@@ -38,14 +38,22 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> AddProduct(CreateProductDTO productDTO)
     {
         await _productService.AddProduct(productDTO);
-        return Ok("Product added successfully!");
+        return Ok(new { message = "Product added successfully!" });
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateProduct(int id, CreateProductDTO productDTO)
     {
         await _productService.UpdateProduct(id, productDTO);
-        return Ok("Product updated successfully!");
+        return Ok(new { message = "Product updated successfully!" });
+    }
+
+    [HttpPost("{id}/adjust-stock")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> AdjustStock(int id, AdjustStockDTO adjustStockDTO)
+    {
+        await _productService.AdjustStock(id, adjustStockDTO);
+        return Ok(new { message = "Stock adjusted successfully!" });
     }
 
     [HttpDelete("{id}")]
@@ -53,6 +61,6 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> DeleteProduct(int id)
     {
         await _productService.DeleteProduct(id);
-        return Ok("Product deleted successfully!");
+        return Ok(new { message = "Product deleted successfully!" });
     }
 }
