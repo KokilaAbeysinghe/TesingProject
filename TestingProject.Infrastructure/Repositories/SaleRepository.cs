@@ -46,11 +46,18 @@ public class SaleRepository : ISaleRepository
 
     public async Task<List<Sale>> GetSalesBetweenDates(DateTime startDate, DateTime endDate)
     {
+        var utcStartDate = startDate.Kind == DateTimeKind.Utc
+            ? startDate
+            : DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+        var utcEndDate = endDate.Kind == DateTimeKind.Utc
+            ? endDate
+            : DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
+
         return await _context.Sales
             .Include(s => s.Customer)
             .Include(s => s.SaleItems)
             .ThenInclude(si => si.Product)
-            .Where(s => s.SaleDate >= startDate && s.SaleDate < endDate)
+            .Where(s => s.SaleDate >= utcStartDate && s.SaleDate < utcEndDate)
             .ToListAsync();
     }
 }
