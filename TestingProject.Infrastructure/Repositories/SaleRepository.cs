@@ -37,4 +37,27 @@ public class SaleRepository : ISaleRepository
         await _context.Sales.AddAsync(sale);
         await _context.SaveChangesAsync();
     }
+
+    public async Task UpdateSale(Sale sale)
+    {
+        _context.Sales.Update(sale);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<Sale>> GetSalesBetweenDates(DateTime startDate, DateTime endDate)
+    {
+        var utcStartDate = startDate.Kind == DateTimeKind.Utc
+            ? startDate
+            : DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+        var utcEndDate = endDate.Kind == DateTimeKind.Utc
+            ? endDate
+            : DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
+
+        return await _context.Sales
+            .Include(s => s.Customer)
+            .Include(s => s.SaleItems)
+            .ThenInclude(si => si.Product)
+            .Where(s => s.SaleDate >= utcStartDate && s.SaleDate < utcEndDate)
+            .ToListAsync();
+    }
 }

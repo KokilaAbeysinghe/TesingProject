@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TestingProject.Domain.Enums;
 
 namespace TestingProject.Application.DTOs;
 
@@ -10,4 +11,5 @@ public class CreateSaleDTO
     [Required]
     [MinLength(1, ErrorMessage = "At least one sale item is required.")]
     public List<CreateSaleItemDTO> SaleItems { get; set; } = new();
+    public PaymentMethod PaymentMethod { get; set; }
 }
