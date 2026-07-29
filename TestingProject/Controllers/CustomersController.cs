@@ -38,6 +38,8 @@ public class CustomersController : ControllerBase
         await _customerService.AddCustomer(customerDTO);
         return Ok("Customer added successfully!");
 
+
+
     }
 
     [HttpPut("{id}")]
@@ -45,6 +47,8 @@ public class CustomersController : ControllerBase
     {
         await _customerService.UpdateCustomer(id, customerDTO);
         return Ok("Customer updated successfully!");
+
+
 
     }
 
@@ -54,6 +58,8 @@ public class CustomersController : ControllerBase
     {
         await _customerService.DeleteCustomer(id);
         return Ok("Customer deleted successfully!");
+
+
 
     }
 }

@@ -39,6 +39,7 @@ public class CustomerRepository : ICustomerRepository
                 $"Customer with ID {customer.Id} not found!");
 
         existing.Name = customer.Name;
+        existing.LastName = customer.LastName;
         existing.Phone = customer.Phone;
        
         await _context.SaveChangesAsync();

@@ -42,13 +42,19 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("export/excel")]
-    public async Task<IActionResult> ExportSalesReportToExcel(DateTime startDate, DateTime endDate)
+    public async Task<IActionResult> ExportSalesReportToExcel(DateTime startDate, DateTime endDate, string reportType = "summary")
     {
         if (startDate > endDate)
             return BadRequest("Start date must be before or equal to end date.");
 
-        var fileContent = await _reportService.ExportSalesReportToExcel(startDate, endDate);
-        var fileName = $"sales-report_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.xlsx";
+        var fileContent = await _reportService.ExportSalesReportToExcel(startDate, endDate, reportType);
+        var reportTypeFileNamePart = reportType switch
+        {
+            "topProducts" => "top-products",
+            "paymentMethods" => "payment-methods",
+            _ => "summary"
+        };
+        var fileName = $"{reportTypeFileNamePart}-report_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.xlsx";
 
         return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }

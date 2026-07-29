@@ -80,13 +80,34 @@ public class ReportService : IReportService
         return paymentMethodSummary;
     }
 
-    public async Task<byte[]> ExportSalesReportToExcel(DateTime startDate, DateTime endDate)
+    public async Task<byte[]> ExportSalesReportToExcel(DateTime startDate, DateTime endDate, string reportType)
+    {
+        using var workbook = new XLWorkbook();
+
+        switch (reportType)
+        {
+            case "topProducts":
+                await AddTopProductsSheet(workbook, startDate, endDate);
+                break;
+
+            case "paymentMethods":
+                await AddPaymentMethodsSheet(workbook, startDate, endDate);
+                break;
+
+            default:
+                await AddSummarySheet(workbook, startDate, endDate);
+                break;
+        }
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+
+        return stream.ToArray();
+    }
+
+    private async Task AddSummarySheet(XLWorkbook workbook, DateTime startDate, DateTime endDate)
     {
         var summary = await GetSalesSummary(startDate, endDate);
-        var topProducts = await GetTopProducts(startDate, endDate, 10);
-        var paymentMethodSummary = await GetPaymentMethodSummary(startDate, endDate);
-
-        using var workbook = new XLWorkbook();
 
         var summarySheet = workbook.Worksheets.Add("Summary");
         summarySheet.Cell(1, 1).Value = "Sales Report";
@@ -102,7 +123,11 @@ public class ReportService : IReportService
         summarySheet.Cell(6, 2).Value = summary.TotalItemsSold;
         summarySheet.Column(1).Width = 22;
         summarySheet.Column(2).Width = 18;
+    }
 
+    private async Task AddTopProductsSheet(XLWorkbook workbook, DateTime startDate, DateTime endDate)
+    {
+        var topProducts = await GetTopProducts(startDate, endDate, 10);
 
         var topProductsSheet = workbook.Worksheets.Add("Top Products");
         topProductsSheet.Cell(1, 1).Value = "Product";
@@ -120,6 +145,11 @@ public class ReportService : IReportService
         }
 
         topProductsSheet.Columns().AdjustToContents();
+    }
+
+    private async Task AddPaymentMethodsSheet(XLWorkbook workbook, DateTime startDate, DateTime endDate)
+    {
+        var paymentMethodSummary = await GetPaymentMethodSummary(startDate, endDate);
 
         var paymentMethodSheet = workbook.Worksheets.Add("Payment Methods");
         paymentMethodSheet.Cell(1, 1).Value = "Payment Method";
@@ -137,11 +167,6 @@ public class ReportService : IReportService
         }
 
         paymentMethodSheet.Columns().AdjustToContents();
-
-        using var stream = new MemoryStream();
-        workbook.SaveAs(stream);
-
-        return stream.ToArray();
     }
 
     private static DateTime ToUtcStartDate(DateTime startDate) =>

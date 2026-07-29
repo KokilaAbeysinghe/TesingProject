@@ -20,6 +20,7 @@ public class CustomerService : ICustomerService
         {
             Id = c.Id,
             Name = c.Name,
+            LastName =c.LastName,
             Phone = c.Phone,
            
         }).ToList();
@@ -37,6 +38,7 @@ public class CustomerService : ICustomerService
         {
             Id = customer.Id,
             Name = customer.Name,
+            LastName = customer.LastName,
             Phone = customer.Phone,
             
         };
@@ -47,6 +49,7 @@ public class CustomerService : ICustomerService
         var customer = new Customer
         {
             Name = customerDTO.Name,
+            LastName = customerDTO.LastName,
             Phone = customerDTO.Phone,
            
         };
@@ -59,6 +62,7 @@ public class CustomerService : ICustomerService
         {
             Id = id,
             Name = customerDTO.Name,
+            LastName = customerDTO.LastName,
             Phone = customerDTO.Phone,
            
         };
