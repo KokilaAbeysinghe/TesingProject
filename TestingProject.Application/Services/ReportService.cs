@@ -100,6 +100,10 @@ public class ReportService : IReportService
                 await AddTopCustomersSheet(workbook, startDate, endDate);
                 break;
 
+            case "dailySales":
+                await AddDailySalesSheet(workbook, startDate, endDate);
+                break;
+
             default:
                 await AddSummarySheet(workbook, startDate, endDate);
                 break;
@@ -130,6 +134,27 @@ public class ReportService : IReportService
             .ToList();
 
         return topCustomers;
+    }
+
+    public async Task<List<DailySalesSummaryDTO>> GetDailySalesSummary(DateTime startDate, DateTime endDate)
+    {
+        var sales = await _saleRepository.GetSalesBetweenDates(
+            ToUtcStartDate(startDate),
+            ToUtcExclusiveEndDate(endDate));
+
+        var dailySalesSummary = sales
+            .Where(sale => sale.Status != SaleStatus.Voided)
+            .GroupBy(sale => sale.SaleDate.Date)
+            .Select(group => new DailySalesSummaryDTO
+            {
+                Date = group.Key,
+                SalesCount = group.Count(),
+                TotalRevenue = group.Sum(sale => sale.TotalAmount)
+            })
+            .OrderBy(summary => summary.Date)
+            .ToList();
+
+        return dailySalesSummary;
     }
 
 
@@ -213,6 +238,28 @@ public class ReportService : IReportService
             sheet.Cell(row, 1).Value = customer.CustomerName;
             sheet.Cell(row, 2).Value = customer.QuantityBuy;
             sheet.Cell(row, 3).Value = customer.CustomerAmount;
+            row++;
+        }
+
+        sheet.Columns().AdjustToContents();
+    }
+
+    private async Task AddDailySalesSheet(XLWorkbook workbook, DateTime startDate, DateTime endDate)
+    {
+        var dailySalesSummary = await GetDailySalesSummary(startDate, endDate);
+
+        var sheet = workbook.Worksheets.Add("Daily Sales Summary");
+        sheet.Cell(1, 1).Value = "Date";
+        sheet.Cell(1, 2).Value = "No of Sales";
+        sheet.Cell(1, 3).Value = "Total Revenue (LKR)";
+        sheet.Range(1, 1, 1, 3).Style.Font.Bold = true;
+
+        var row = 2;
+        foreach (var dailySummary in dailySalesSummary)
+        {
+            sheet.Cell(row, 1).Value = dailySummary.Date.ToString("yyyy-MM-dd");
+            sheet.Cell(row, 2).Value = dailySummary.SalesCount;
+            sheet.Cell(row, 3).Value = dailySummary.TotalRevenue;
             row++;
         }
 

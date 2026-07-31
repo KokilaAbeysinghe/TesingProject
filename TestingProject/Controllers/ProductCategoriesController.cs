@@ -25,6 +25,14 @@ public class ProductCategoriesController : ControllerBase
         return Ok(categories);
     }
 
+    // GET: api/productcategories/paged
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetCategoriesPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var categories = await _categoryService.GetCategoriesPaged(pageNumber, pageSize);
+        return Ok(categories);
+    }
+
     // GET: api/productcategories/1
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCategoryById(int id)

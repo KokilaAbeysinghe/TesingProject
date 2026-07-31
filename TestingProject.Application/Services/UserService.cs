@@ -30,6 +30,19 @@ public class UserService : IUserService
         return users.Select(MapToDto).ToList();
     }
 
+    public async Task<PagedResultDTO<UserDTO>> GetUsersPaged(int pageNumber, int pageSize)
+    {
+        var (users, totalCount) = await _userRepository.GetUsersPaged(pageNumber, pageSize);
+
+        return new PagedResultDTO<UserDTO>
+        {
+            Items = users.Select(MapToDto).ToList(),
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
     public async Task<UserDTO> GetUserById(int id)
     {
         var user = await _userRepository.GetUserById(id);

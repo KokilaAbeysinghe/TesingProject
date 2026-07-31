@@ -25,6 +25,7 @@ public class CustomerRepository : ICustomerRepository
 
         var totalCount = await query.CountAsync();
 
+
         var items = await query
             .OrderBy(c => c.Name)
             .Skip((pageNumber - 1) * pageSize)

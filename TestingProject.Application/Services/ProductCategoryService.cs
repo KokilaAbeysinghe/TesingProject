@@ -24,6 +24,24 @@ public class ProductCategoryService : IProductCategoryService
         }).ToList();
     }
 
+    public async Task<PagedResultDTO<ProductCategoryDTO>> GetCategoriesPaged(int pageNumber, int pageSize)
+    {
+        var (categories, totalCount) = await _categoryRepository.GetCategoriesPaged(pageNumber, pageSize);
+
+        return new PagedResultDTO<ProductCategoryDTO>
+        {
+            Items = categories.Select(c => new ProductCategoryDTO
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Description = c.Description
+            }).ToList(),
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
     public async Task<ProductCategoryDTO> GetCategoryById(int id)
     {
         var category = await _categoryRepository.GetCategoryById(id);

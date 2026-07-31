@@ -10,4 +10,5 @@ public interface IReportService
     Task<List<PaymentMethodSummaryDTO>> GetPaymentMethodSummary(DateTime startDate, DateTime endDate);
     Task<byte[]> ExportSalesReportToExcel(DateTime startDate, DateTime endDate, string reportType);
     Task<List<TopCustomerDTO>> GetTopCustomers(DateTime startDate, DateTime endDate);
+    Task<List<DailySalesSummaryDTO>> GetDailySalesSummary(DateTime startDate, DateTime endDate);
 }

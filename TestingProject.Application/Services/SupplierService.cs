@@ -20,6 +20,19 @@ public class SupplierService : ISupplierService
         return suppliers.Select(MapToDto).ToList();
     }
 
+    public async Task<PagedResultDTO<SupplierDTO>> GetSuppliersPaged(int pageNumber, int pageSize, string? search)
+    {
+        var (suppliers, totalCount) = await _supplierRepository.GetSuppliersPaged(pageNumber, pageSize, search);
+
+        return new PagedResultDTO<SupplierDTO>
+        {
+            Items = suppliers.Select(MapToDto).ToList(),
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
     public async Task<SupplierDTO> GetSupplierById(int id)
     {
         var supplier = await _supplierRepository.GetSupplierById(id);

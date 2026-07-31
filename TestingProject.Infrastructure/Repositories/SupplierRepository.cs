@@ -19,6 +19,27 @@ public class SupplierRepository : ISupplierRepository
         return await _context.Suppliers.ToListAsync();
     }
 
+    public async Task<(List<Supplier> Items, int TotalCount)> GetSuppliersPaged(int pageNumber, int pageSize, string? search)
+    {
+        var query = _context.Suppliers.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var pattern = $"%{search.Trim()}%";
+            query = query.Where(s => EF.Functions.ILike(s.Name, pattern));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderBy(s => s.Name)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<Supplier?> GetSupplierById(int id)
     {
         return await _context.Suppliers.FindAsync(id);

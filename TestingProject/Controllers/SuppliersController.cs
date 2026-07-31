@@ -25,6 +25,17 @@ public class SuppliersController : ControllerBase
         return Ok(suppliers);
     }
 
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetSuppliersPaged(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null)
+    {
+        var suppliers = await _supplierService.GetSuppliersPaged(pageNumber, pageSize, search);
+
+        return Ok(suppliers);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSupplierById(int id)
     {

@@ -47,6 +47,13 @@ public class ReportsController : ControllerBase
         return Ok(topCustomers);
     }
 
+    [HttpGet("daily-sales")]
+    public async Task<IActionResult> GetDailySalesSummary(DateTime startDate, DateTime endDate)
+    {
+        var dailySalesSummary = await _reportService.GetDailySalesSummary(startDate, endDate);
+        return Ok(dailySalesSummary);
+    }
+
 
 
 
@@ -61,6 +68,7 @@ public class ReportsController : ControllerBase
         {
             "topProducts" => "top-products",
             "paymentMethods" => "payment-methods",
+            "dailySales" => "daily-sales",
             _ => "summary"
         };
         var fileName = $"{reportTypeFileNamePart}-report_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.xlsx";

@@ -25,6 +25,14 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetUsersPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var users = await _userService.GetUsersPaged(pageNumber, pageSize);
+
+        return Ok(users);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(int id)
     {
