@@ -8,32 +8,37 @@ namespace TestingProject.Application.Services;
 
 public class ReportService : IReportService
 {
-    private readonly ISaleRepository _saleRepository;
-   
+    private const int LowStockReorderLevel = 10;
 
-    public ReportService(ISaleRepository saleRepository)
+    private readonly ISaleRepository _saleRepository;
+    private readonly IProductRepository _productRepository;
+
+    public ReportService(ISaleRepository saleRepository, IProductRepository productRepository)
     {
         _saleRepository = saleRepository;
+        _productRepository = productRepository;
     }
 
-    public async Task<SalesSummaryDTO> GetSalesSummary(DateTime startDate, DateTime endDate)
+    public async Task<List<MonthlySalesSummaryDTO>> GetMonthlySalesSummary(DateTime startDate, DateTime endDate)
     {
         var sales = await _saleRepository.GetSalesBetweenDates(
             ToUtcStartDate(startDate),
             ToUtcExclusiveEndDate(endDate));
 
-        var completedSales = sales
+        var monthlySalesSummary = sales
             .Where(sale => sale.Status != SaleStatus.Voided)
+            .GroupBy(sale => new DateTime(sale.SaleDate.Year, sale.SaleDate.Month, 1))
+            .OrderBy(group => group.Key)
+            .Select(group => new MonthlySalesSummaryDTO
+            {
+                Month = group.Key.ToString("MMM yyyy"),
+                TransactionCount = group.Count(),
+                TotalRevenue = group.Sum(sale => sale.TotalAmount),
+                AverageSaleValue = group.Sum(sale => sale.TotalAmount) / group.Count()
+            })
             .ToList();
 
-        return new SalesSummaryDTO
-        {
-            StartDate = startDate,
-            EndDate = endDate,
-            TotalSalesCount = completedSales.Count,
-            TotalItemsSold = completedSales.Sum(s => s.SaleItems.Sum(si => si.Quantity)),
-            TotalRevenue = completedSales.Sum(s => s.TotalAmount)
-        };
+        return monthlySalesSummary;
     }
 
     public async Task<List<TopProductDTO>> GetTopProducts(DateTime startDate, DateTime endDate, int count)
@@ -46,11 +51,17 @@ public class ReportService : IReportService
             .Where(sale => sale.Status != SaleStatus.Voided)
             .SelectMany(s => s.SaleItems)
             .Where(si => si.Product is not null)
-            .GroupBy(si => new { si.ProductId, ProductName = si.Product.Name })
+            .GroupBy(si => new
+            {
+                si.ProductId,
+                ProductName = si.Product.Name,
+                CategoryName = si.Product.ProductCategory is not null ? si.Product.ProductCategory.Name : "Uncategorized"
+            })
             .Select(group => new TopProductDTO
             {
                 ProductId = group.Key.ProductId,
                 ProductName = group.Key.ProductName,
+                CategoryName = group.Key.CategoryName,
                 QuantitySold = group.Sum(si => si.Quantity),
                 Revenue = group.Sum(si => si.Quantity * si.UnitPrice)
             })
@@ -102,6 +113,10 @@ public class ReportService : IReportService
 
             case "dailySales":
                 await AddDailySalesSheet(workbook, startDate, endDate);
+                break;
+
+            case "lowStock":
+                await AddLowStockSheet(workbook);
                 break;
 
             default:
@@ -157,25 +172,48 @@ public class ReportService : IReportService
         return dailySalesSummary;
     }
 
+    public async Task<List<LowStockProductDTO>> GetLowStockProducts()
+    {
+        var products = await _productRepository.GetAllProducts();
+
+        var lowStockProducts = products
+            .Where(product => product.Stock <= LowStockReorderLevel)
+            .OrderBy(product => product.Stock)
+            .Select(product => new LowStockProductDTO
+            {
+                ProductName = product.Name,
+                CurrentStock = product.Stock,
+                ReorderLevel = LowStockReorderLevel,
+                Status = product.Stock == 0 ? "Out of Stock" : "Low Stock"
+            })
+            .ToList();
+
+        return lowStockProducts;
+    }
+
 
     private async Task AddSummarySheet(XLWorkbook workbook, DateTime startDate, DateTime endDate)
     {
-        var summary = await GetSalesSummary(startDate, endDate);
+        var monthlySalesSummary = await GetMonthlySalesSummary(startDate, endDate);
 
         var summarySheet = workbook.Worksheets.Add("Summary");
-        summarySheet.Cell(1, 1).Value = "Sales Report";
-        summarySheet.Cell(2, 1).Value = "Start Date";
-        summarySheet.Cell(2, 2).Value = summary.StartDate.ToString("yyyy-MM-dd");
-        summarySheet.Cell(3, 1).Value = "End Date";
-        summarySheet.Cell(3, 2).Value = summary.EndDate.ToString("yyyy-MM-dd");
-        summarySheet.Cell(4, 1).Value = "Total Revenue (LKR)";
-        summarySheet.Cell(4, 2).Value = summary.TotalRevenue;
-        summarySheet.Cell(5, 1).Value = "Total Sales Count";
-        summarySheet.Cell(5, 2).Value = summary.TotalSalesCount;
-        summarySheet.Cell(6, 1).Value = "Total Items Sold";
-        summarySheet.Cell(6, 2).Value = summary.TotalItemsSold;
-        summarySheet.Column(1).Width = 22;
-        summarySheet.Column(2).Width = 18;
+        summarySheet.Cell(1, 1).Value = "Month";
+        summarySheet.Cell(1, 2).Value = "Transactions";
+        summarySheet.Cell(1, 3).Value = "Total Revenue (LKR)";
+        summarySheet.Cell(1, 4).Value = "Average Sale Value (LKR)";
+        summarySheet.Range(1, 1, 1, 4).Style.Font.Bold = true;
+
+        var row = 2;
+        foreach (var monthSummary in monthlySalesSummary)
+        {
+            summarySheet.Cell(row, 1).Value = monthSummary.Month;
+            summarySheet.Cell(row, 2).Value = monthSummary.TransactionCount;
+            summarySheet.Cell(row, 3).Value = monthSummary.TotalRevenue;
+            summarySheet.Cell(row, 4).Value = monthSummary.AverageSaleValue;
+            row++;
+        }
+
+        summarySheet.Columns().AdjustToContents();
     }
 
     private async Task AddTopProductsSheet(XLWorkbook workbook, DateTime startDate, DateTime endDate)
@@ -184,16 +222,18 @@ public class ReportService : IReportService
 
         var topProductsSheet = workbook.Worksheets.Add("Top Products");
         topProductsSheet.Cell(1, 1).Value = "Product";
-        topProductsSheet.Cell(1, 2).Value = "Quantity Sold";
-        topProductsSheet.Cell(1, 3).Value = "Revenue (LKR)";
-        topProductsSheet.Range(1, 1, 1, 3).Style.Font.Bold = true;
+        topProductsSheet.Cell(1, 2).Value = "Category";
+        topProductsSheet.Cell(1, 3).Value = "Qty Sold";
+        topProductsSheet.Cell(1, 4).Value = "Revenue (LKR)";
+        topProductsSheet.Range(1, 1, 1, 4).Style.Font.Bold = true;
 
         var row = 2;
         foreach (var product in topProducts)
         {
             topProductsSheet.Cell(row, 1).Value = product.ProductName;
-            topProductsSheet.Cell(row, 2).Value = product.QuantitySold;
-            topProductsSheet.Cell(row, 3).Value = product.Revenue;
+            topProductsSheet.Cell(row, 2).Value = product.CategoryName;
+            topProductsSheet.Cell(row, 3).Value = product.QuantitySold;
+            topProductsSheet.Cell(row, 4).Value = product.Revenue;
             row++;
         }
 
@@ -260,6 +300,30 @@ public class ReportService : IReportService
             sheet.Cell(row, 1).Value = dailySummary.Date.ToString("yyyy-MM-dd");
             sheet.Cell(row, 2).Value = dailySummary.SalesCount;
             sheet.Cell(row, 3).Value = dailySummary.TotalRevenue;
+            row++;
+        }
+
+        sheet.Columns().AdjustToContents();
+    }
+
+    private async Task AddLowStockSheet(XLWorkbook workbook)
+    {
+        var lowStockProducts = await GetLowStockProducts();
+
+        var sheet = workbook.Worksheets.Add("Low Stock");
+        sheet.Cell(1, 1).Value = "Product";
+        sheet.Cell(1, 2).Value = "Current Stock";
+        sheet.Cell(1, 3).Value = "Reorder Level";
+        sheet.Cell(1, 4).Value = "Status";
+        sheet.Range(1, 1, 1, 4).Style.Font.Bold = true;
+
+        var row = 2;
+        foreach (var product in lowStockProducts)
+        {
+            sheet.Cell(row, 1).Value = product.ProductName;
+            sheet.Cell(row, 2).Value = product.CurrentStock;
+            sheet.Cell(row, 3).Value = product.ReorderLevel;
+            sheet.Cell(row, 4).Value = product.Status;
             row++;
         }
 

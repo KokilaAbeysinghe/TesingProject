@@ -76,6 +76,7 @@ public class SaleRepository : ISaleRepository
             .Include(s => s.Customer)
             .Include(s => s.SaleItems)
             .ThenInclude(si => si.Product)
+            .ThenInclude(p => p.ProductCategory)
             .Where(s => s.SaleDate >= utcStartDate && s.SaleDate < utcEndDate)
             .ToListAsync();
     }

@@ -18,12 +18,11 @@ public class ReportsController : ControllerBase
     }
 
 
-    [HttpGet("summary")]
-    public async Task<IActionResult> GetSalesSummary(DateTime startDate, DateTime endDate)
-
+    [HttpGet("monthly-sales")]
+    public async Task<IActionResult> GetMonthlySalesSummary(DateTime startDate, DateTime endDate)
     {
-        var summary = await _reportService.GetSalesSummary(startDate, endDate);
-        return Ok(summary);
+        var monthlySalesSummary = await _reportService.GetMonthlySalesSummary(startDate, endDate);
+        return Ok(monthlySalesSummary);
     }
 
     [HttpGet("top-products")]
@@ -54,6 +53,13 @@ public class ReportsController : ControllerBase
         return Ok(dailySalesSummary);
     }
 
+    [HttpGet("low-stock")]
+    public async Task<IActionResult> GetLowStockProducts()
+    {
+        var lowStockProducts = await _reportService.GetLowStockProducts();
+        return Ok(lowStockProducts);
+    }
+
 
 
 
@@ -69,6 +75,7 @@ public class ReportsController : ControllerBase
             "topProducts" => "top-products",
             "paymentMethods" => "payment-methods",
             "dailySales" => "daily-sales",
+            "lowStock" => "low-stock",
             _ => "summary"
         };
         var fileName = $"{reportTypeFileNamePart}-report_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.xlsx";
