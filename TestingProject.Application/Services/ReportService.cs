@@ -141,7 +141,8 @@ public class ReportService : IReportService
             .GroupBy(sale => sale.Customer)
             .Select(group => new TopCustomerDTO
             {
-                CustomerName = group.Key.Name,
+                CustomerId = group.Key.Id,
+                CustomerName = $"{group.Key.Name} {group.Key.LastName}".Trim(),
                 QuantityBuy = group.Count(),
                 CustomerAmount = group.Sum(sale => sale.TotalAmount)
             })
@@ -331,8 +332,8 @@ public class ReportService : IReportService
     }
 
     private static DateTime ToUtcStartDate(DateTime startDate) =>
-        DateTime.SpecifyKind(startDate.Date, DateTimeKind.Utc);
+        DateTime.SpecifyKind(startDate.Date, DateTimeKind.Local).ToUniversalTime();
 
     private static DateTime ToUtcExclusiveEndDate(DateTime endDate) =>
-        DateTime.SpecifyKind(endDate.Date.AddDays(1), DateTimeKind.Utc);
+        DateTime.SpecifyKind(endDate.Date.AddDays(1), DateTimeKind.Local).ToUniversalTime();
 }

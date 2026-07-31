@@ -74,6 +74,7 @@ public class ReportsController : ControllerBase
         {
             "topProducts" => "top-products",
             "paymentMethods" => "payment-methods",
+            "topCustomers" => "top-customers",
             "dailySales" => "daily-sales",
             "lowStock" => "low-stock",
             _ => "summary"

@@ -67,12 +67,16 @@ public class SaleService : ISaleService
             });
         }
 
+        var subtotalAmount = saleItems.Sum(si => si.UnitPrice * si.Quantity);
+        var discountAmount = Math.Round(subtotalAmount * saleDTO.DiscountPercentage / 100m, 2);
+
         var sale = new Sale
         {
             CustomerId = saleDTO.CustomerId,
             SaleDate = DateTime.UtcNow,
             SaleItems = saleItems,
-            TotalAmount = saleItems.Sum(si => si.UnitPrice * si.Quantity),
+            DiscountPercentage = saleDTO.DiscountPercentage,
+            TotalAmount = subtotalAmount - discountAmount,
             PaymentMethod = saleDTO.PaymentMethod
         };
 
@@ -95,8 +99,13 @@ public class SaleService : ISaleService
         if (sale.Status == SaleStatus.Voided)
             throw new InvalidOperationException("A voided sale cannot be edited.");
 
+        var subtotalAmount = sale.SaleItems.Sum(si => si.UnitPrice * si.Quantity);
+        var discountAmount = Math.Round(subtotalAmount * saleDTO.DiscountPercentage / 100m, 2);
+
         sale.CustomerId = saleDTO.CustomerId;
         sale.PaymentMethod = saleDTO.PaymentMethod;
+        sale.DiscountPercentage = saleDTO.DiscountPercentage;
+        sale.TotalAmount = subtotalAmount - discountAmount;
 
         await _saleRepository.UpdateSale(sale);
     }
@@ -131,17 +140,25 @@ public class SaleService : ISaleService
         if (sale is null)
             throw new KeyNotFoundException($"Sale with ID {saleId} not found.");
 
-        return sale.SaleItems.Sum(item => item.UnitPrice * item.Quantity);
+        var subtotalAmount = sale.SaleItems.Sum(item => item.UnitPrice * item.Quantity);
+        var discountAmount = Math.Round(subtotalAmount * sale.DiscountPercentage / 100m, 2);
+
+        return subtotalAmount - discountAmount;
     }
 
     private static SaleDTO MapToDto(Sale sale)
     {
+        var subtotalAmount = sale.SaleItems.Sum(si => si.UnitPrice * si.Quantity);
+
         return new SaleDTO
         {
             Id = sale.Id,
             SaleDate = sale.SaleDate,
             CustomerId = sale.CustomerId,
             CustomerName = sale.Customer.Name,
+            SubtotalAmount = subtotalAmount,
+            DiscountPercentage = sale.DiscountPercentage,
+            DiscountAmount = Math.Round(subtotalAmount * sale.DiscountPercentage / 100m, 2),
             TotalAmount = sale.TotalAmount,
             PaymentMethod = sale.PaymentMethod,
             Status = sale.Status,

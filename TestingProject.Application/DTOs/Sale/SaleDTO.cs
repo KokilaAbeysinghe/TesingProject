@@ -8,6 +8,9 @@ public class SaleDTO
     public DateTime SaleDate { get; set; }
     public int CustomerId { get; set; }
     public string CustomerName { get; set; } = string.Empty;
+    public decimal SubtotalAmount { get; set; }
+    public int DiscountPercentage { get; set; }
+    public decimal DiscountAmount { get; set; }
     public decimal TotalAmount { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
     public SaleStatus Status { get; set; }

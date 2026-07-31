@@ -10,6 +10,7 @@ public class Sale
     public int CustomerId { get; set; }
     public Customer Customer { get; set; } = null!;
     public List<SaleItem> SaleItems { get; set; } = new();
+    public int DiscountPercentage { get; set; }
     public decimal TotalAmount { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
     public SaleStatus Status { get; set; } = SaleStatus.Completed;

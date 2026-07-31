@@ -11,5 +11,7 @@ public class CreateSaleDTO
     [Required]
     [MinLength(1, ErrorMessage = "At least one sale item is required.")]
     public List<CreateSaleItemDTO> SaleItems { get; set; } = new();
+    [Range(0, 100, ErrorMessage = "Discount percentage must be a whole number between 0 and 100.")]
+    public int DiscountPercentage { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
 }
