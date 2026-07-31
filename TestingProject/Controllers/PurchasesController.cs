@@ -25,6 +25,14 @@ public class PurchasesController : ControllerBase
         return Ok(purchases);
     }
 
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPurchasesPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var purchases = await _purchaseService.GetPurchasesPaged(pageNumber, pageSize);
+
+        return Ok(purchases);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPurchaseById(int id)
     {

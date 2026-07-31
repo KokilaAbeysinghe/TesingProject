@@ -24,6 +24,25 @@ public class PurchaseRepository : IPurchaseRepository
             .ToListAsync();
     }
 
+    public async Task<(List<Purchase> Items, int TotalCount)> GetPurchasesPaged(int pageNumber, int pageSize)
+    {
+        var query = _context.Purchases
+            .Include(purchase => purchase.Supplier)
+            .Include(purchase => purchase.PurchaseItems)
+            .ThenInclude(item => item.Product)
+            .AsQueryable();
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(purchase => purchase.PurchaseDate)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<Purchase?> GetPurchaseById(int id)
     {
         return await _context.Purchases

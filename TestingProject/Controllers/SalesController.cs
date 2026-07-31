@@ -24,6 +24,13 @@ public class SalesController : ControllerBase
         return Ok(sales);
     }
 
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetSalesPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var sales = await _saleService.GetSalesPaged(pageNumber, pageSize);
+        return Ok(sales);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSaleById(int id)
     {

@@ -19,6 +19,34 @@ public class ProductRepository : IProductRepository
         return await _context.Products.Include(p => p.ProductCategory).ToListAsync();
     }
 
+    public async Task<(List<Product> Items, int TotalCount)> GetProductsPaged(int pageNumber, int pageSize, string? search, int? maxStock)
+    {
+        var query = _context.Products.Include(p => p.ProductCategory).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var pattern = $"%{search.Trim()}%";
+            query = query.Where(p =>
+                EF.Functions.ILike(p.Name, pattern)
+                || (p.ProductCategory != null && EF.Functions.ILike(p.ProductCategory.Name, pattern)));
+        }
+
+        if (maxStock.HasValue)
+        {
+            query = query.Where(p => p.Stock <= maxStock.Value);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderBy(p => p.Name)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<Product?> GetProductById(int id)
     {
         return await _context.Products

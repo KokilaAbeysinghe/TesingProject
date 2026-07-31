@@ -27,6 +27,19 @@ public class PurchaseService : IPurchaseService
         return purchases.Select(MapToDto).ToList();
     }
 
+    public async Task<PagedResultDTO<PurchaseDTO>> GetPurchasesPaged(int pageNumber, int pageSize)
+    {
+        var (purchases, totalCount) = await _purchaseRepository.GetPurchasesPaged(pageNumber, pageSize);
+
+        return new PagedResultDTO<PurchaseDTO>
+        {
+            Items = purchases.Select(MapToDto).ToList(),
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
     public async Task<PurchaseDTO> GetPurchaseById(int id)
     {
         var purchase = await _purchaseRepository.GetPurchaseById(id);

@@ -1,5 +1,6 @@
 using ClosedXML.Excel;
 using TestingProject.Application.DTOs;
+using TestingProject.Application.DTOs.Report;
 using TestingProject.Application.Interfaces;
 using TestingProject.Domain.Enums;
 
@@ -8,6 +9,7 @@ namespace TestingProject.Application.Services;
 public class ReportService : IReportService
 {
     private readonly ISaleRepository _saleRepository;
+   
 
     public ReportService(ISaleRepository saleRepository)
     {
@@ -94,6 +96,10 @@ public class ReportService : IReportService
                 await AddPaymentMethodsSheet(workbook, startDate, endDate);
                 break;
 
+            case "topCustomers":
+                await AddTopCustomersSheet(workbook, startDate, endDate);
+                break;
+
             default:
                 await AddSummarySheet(workbook, startDate, endDate);
                 break;
@@ -104,6 +110,28 @@ public class ReportService : IReportService
 
         return stream.ToArray();
     }
+
+    public async Task<List<TopCustomerDTO>> GetTopCustomers(DateTime startDate, DateTime endDate)
+    {
+        var sales = await _saleRepository.GetSalesBetweenDates(
+            ToUtcStartDate(startDate),
+            ToUtcExclusiveEndDate(endDate));
+
+        var topCustomers = sales
+            .Where(sale => sale.Status != SaleStatus.Voided)
+            .GroupBy(sale => sale.Customer)
+            .Select(group => new TopCustomerDTO
+            {
+                CustomerName = group.Key.Name,
+                QuantityBuy = group.Count(),
+                CustomerAmount = group.Sum(sale => sale.TotalAmount)
+            })
+            .OrderByDescending(summary => summary.CustomerAmount)
+            .ToList();
+
+        return topCustomers;
+    }
+
 
     private async Task AddSummarySheet(XLWorkbook workbook, DateTime startDate, DateTime endDate)
     {
@@ -167,6 +195,28 @@ public class ReportService : IReportService
         }
 
         paymentMethodSheet.Columns().AdjustToContents();
+    }
+
+    private async Task AddTopCustomersSheet(XLWorkbook workbook, DateTime startDate, DateTime endDate)
+    {
+        var topCustomers = await GetTopCustomers(startDate, endDate);
+
+        var sheet = workbook.Worksheets.Add("Top Customers");
+        sheet.Cell(1, 1).Value = "Customer Name";
+        sheet.Cell(1, 2).Value = "Quantity Buy";
+        sheet.Cell(1, 3).Value = "Amount (LKR)";
+        sheet.Range(1, 1, 1, 3).Style.Font.Bold = true;
+
+        var row = 2;
+        foreach (var customer in topCustomers)
+        {
+            sheet.Cell(row, 1).Value = customer.CustomerName;
+            sheet.Cell(row, 2).Value = customer.QuantityBuy;
+            sheet.Cell(row, 3).Value = customer.CustomerAmount;
+            row++;
+        }
+
+        sheet.Columns().AdjustToContents();
     }
 
     private static DateTime ToUtcStartDate(DateTime startDate) =>

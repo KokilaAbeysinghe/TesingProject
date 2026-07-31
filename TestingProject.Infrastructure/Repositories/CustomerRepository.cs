@@ -19,6 +19,21 @@ public class CustomerRepository : ICustomerRepository
         return await _context.Customers.ToListAsync();
     }
 
+    public async Task<(List<Customer> Items, int TotalCount)> GetCustomersPaged(int pageNumber, int pageSize)
+    {
+        var query = _context.Customers.AsQueryable();
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderBy(c => c.Name)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<Customer?> GetCustomerById(int id)
     {
         return await _context.Customers.FindAsync(id);

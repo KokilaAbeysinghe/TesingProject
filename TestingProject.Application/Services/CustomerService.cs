@@ -26,6 +26,25 @@ public class CustomerService : ICustomerService
         }).ToList();
     }
 
+    public async Task<PagedResultDTO<CustomerDTO>> GetCustomersPaged(int pageNumber, int pageSize)
+    {
+        var (customers, totalCount) = await _customerRepository.GetCustomersPaged(pageNumber, pageSize);
+
+        return new PagedResultDTO<CustomerDTO>
+        {
+            Items = customers.Select(c => new CustomerDTO
+            {
+                Id = c.Id,
+                Name = c.Name,
+                LastName = c.LastName,
+                Phone = c.Phone
+            }).ToList(),
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
     public async Task<CustomerDTO> GetCustomerById(int id)
     {
         var customer = await _customerRepository.GetCustomerById(id);

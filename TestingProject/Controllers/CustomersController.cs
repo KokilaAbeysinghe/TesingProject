@@ -25,6 +25,13 @@ public class CustomersController : ControllerBase
         return Ok(customers);
     }
 
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetCustomersPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var customers = await _customerService.GetCustomersPaged(pageNumber, pageSize);
+        return Ok(customers);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCustomerById(int id)
     {

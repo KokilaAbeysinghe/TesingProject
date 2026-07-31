@@ -24,6 +24,17 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetProductsPaged(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null,
+        [FromQuery] int? maxStock = null)
+    {
+        var products = await _productService.GetProductsPaged(pageNumber, pageSize, search, maxStock);
+        return Ok(products);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProductById(int id)
     {
@@ -62,5 +73,12 @@ public class ProductsController : ControllerBase
     {
         await _productService.DeleteProduct(id);
         return Ok(new { message = "Product deleted successfully!" });
+    }
+
+    [HttpGet("count")]
+    public async Task<IActionResult> GetProductCount()
+    {
+        var count = await _productService.GetProductsCount();
+        return Ok(count);
     }
 }

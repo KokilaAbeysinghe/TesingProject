@@ -19,23 +19,20 @@ public class SaleService : ISaleService
     public async Task<List<SaleDTO>> GetAllSales()
     {
         var sales = await _saleRepository.GetAllSales();
-        return sales.Select(s => new SaleDTO
+        return sales.Select(MapToDto).ToList();
+    }
+
+    public async Task<PagedResultDTO<SaleDTO>> GetSalesPaged(int pageNumber, int pageSize)
+    {
+        var (sales, totalCount) = await _saleRepository.GetSalesPaged(pageNumber, pageSize);
+
+        return new PagedResultDTO<SaleDTO>
         {
-            Id = s.Id,
-            SaleDate = s.SaleDate,
-            CustomerId = s.CustomerId,
-            CustomerName = s.Customer.Name,
-            TotalAmount = s.TotalAmount,
-            PaymentMethod = s.PaymentMethod,
-            Status = s.Status,
-            SaleItems = s.SaleItems.Select(si => new SaleItemDTO
-            {
-                ProductId = si.ProductId,
-                ProductName = si.Product.Name,
-                Quantity = si.Quantity,
-                UnitPrice = si.UnitPrice
-            }).ToList()
-        }).ToList();
+            Items = sales.Select(MapToDto).ToList(),
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
     }
 
     public async Task<SaleDTO> GetSaleById(int id)
@@ -43,23 +40,8 @@ public class SaleService : ISaleService
         var sale = await _saleRepository.GetSaleById(id);
         if (sale is null)
             throw new KeyNotFoundException($"Sale with ID {id} not found.");
-        return new SaleDTO
-        {
-            Id = sale.Id,
-            SaleDate = sale.SaleDate,
-            CustomerId = sale.CustomerId,
-            CustomerName = sale.Customer.Name,
-            TotalAmount = sale.TotalAmount,
-            PaymentMethod = sale.PaymentMethod,
-            Status = sale.Status,
-            SaleItems = sale.SaleItems.Select(si => new SaleItemDTO
-            {
-                ProductId = si.ProductId,
-                ProductName = si.Product.Name,
-                Quantity = si.Quantity,
-                UnitPrice = si.UnitPrice
-            }).ToList()
-        };
+
+        return MapToDto(sale);
     }
 
     public async Task CreateSale(CreateSaleDTO saleDTO)
@@ -150,5 +132,26 @@ public class SaleService : ISaleService
             throw new KeyNotFoundException($"Sale with ID {saleId} not found.");
 
         return sale.SaleItems.Sum(item => item.UnitPrice * item.Quantity);
+    }
+
+    private static SaleDTO MapToDto(Sale sale)
+    {
+        return new SaleDTO
+        {
+            Id = sale.Id,
+            SaleDate = sale.SaleDate,
+            CustomerId = sale.CustomerId,
+            CustomerName = sale.Customer.Name,
+            TotalAmount = sale.TotalAmount,
+            PaymentMethod = sale.PaymentMethod,
+            Status = sale.Status,
+            SaleItems = sale.SaleItems.Select(si => new SaleItemDTO
+            {
+                ProductId = si.ProductId,
+                ProductName = si.Product.Name,
+                Quantity = si.Quantity,
+                UnitPrice = si.UnitPrice
+            }).ToList()
+        };
     }
 }

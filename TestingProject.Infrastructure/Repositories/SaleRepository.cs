@@ -23,6 +23,25 @@ public class SaleRepository : ISaleRepository
             .ToListAsync();
     }
 
+    public async Task<(List<Sale> Items, int TotalCount)> GetSalesPaged(int pageNumber, int pageSize)
+    {
+        var query = _context.Sales
+            .Include(s => s.Customer)
+            .Include(s => s.SaleItems)
+            .ThenInclude(si => si.Product)
+            .AsQueryable();
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(s => s.SaleDate)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<Sale?> GetSaleById(int id)
     {
         return await _context.Sales

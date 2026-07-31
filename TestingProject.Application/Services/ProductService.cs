@@ -27,6 +27,27 @@ public class ProductService : IProductService
         }).ToList();
     }
 
+    public async Task<PagedResultDTO<ProductDTO>> GetProductsPaged(int pageNumber, int pageSize, string? search, int? maxStock)
+    {
+        var (products, totalCount) = await _productRepository.GetProductsPaged(pageNumber, pageSize, search, maxStock);
+
+        return new PagedResultDTO<ProductDTO>
+        {
+            Items = products.Select(p => new ProductDTO
+            {
+                Id = p.Id,
+                Name = p.Name,
+                ProductCategoryId = p.ProductCategoryId ?? 0,
+                CategoryName = p.ProductCategory?.Name ?? string.Empty,
+                Price = p.Price,
+                Stock = p.Stock
+            }).ToList(),
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
     public async Task<ProductDTO> GetProductById(int id)
     {
         var product = await _productRepository.GetProductById(id);
@@ -99,5 +120,13 @@ public class ProductService : IProductService
     public async Task DeleteProduct(int id)
     {
         await _productRepository.DeleteProduct(id);
+    }
+
+    public async Task<int> GetProductsCount()
+    {
+        var products = await _productRepository.GetAllProducts();
+
+        return products.Count();
+        
     }
 }

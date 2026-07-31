@@ -5,6 +5,7 @@ namespace TestingProject.Application.Interfaces;
 public interface ICustomerRepository
 {
     Task<List<Customer>> GetAllCustomers();
+    Task<(List<Customer> Items, int TotalCount)> GetCustomersPaged(int pageNumber, int pageSize);
     Task<Customer?> GetCustomerById(int id);
     Task AddCustomer(Customer customer);
     Task UpdateCustomer(Customer customer);

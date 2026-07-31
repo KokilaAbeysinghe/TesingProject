@@ -19,7 +19,6 @@ public class ReportsController : ControllerBase
 
 
     [HttpGet("summary")]
-
     public async Task<IActionResult> GetSalesSummary(DateTime startDate, DateTime endDate)
 
     {
@@ -40,6 +39,16 @@ public class ReportsController : ControllerBase
         var paymentMethodSummary = await _reportService.GetPaymentMethodSummary(startDate, endDate);
         return Ok(paymentMethodSummary);
     }
+
+    [HttpGet("top-customers")]
+    public async Task<IActionResult> GetTopCustomers(DateTime startDate, DateTime endDate)
+    {
+        var topCustomers = await _reportService.GetTopCustomers(startDate, endDate);
+        return Ok(topCustomers);
+    }
+
+
+
 
     [HttpGet("export/excel")]
     public async Task<IActionResult> ExportSalesReportToExcel(DateTime startDate, DateTime endDate, string reportType = "summary")

@@ -1,4 +1,5 @@
 using TestingProject.Application.DTOs;
+using TestingProject.Application.DTOs.Report;
 
 namespace TestingProject.Application.Interfaces;
 
@@ -8,4 +9,5 @@ public interface IReportService
     Task<List<TopProductDTO>> GetTopProducts(DateTime startDate, DateTime endDate, int count);
     Task<List<PaymentMethodSummaryDTO>> GetPaymentMethodSummary(DateTime startDate, DateTime endDate);
     Task<byte[]> ExportSalesReportToExcel(DateTime startDate, DateTime endDate, string reportType);
+    Task<List<TopCustomerDTO>> GetTopCustomers(DateTime startDate, DateTime endDate);
 }
