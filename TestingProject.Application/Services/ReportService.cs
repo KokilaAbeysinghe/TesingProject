@@ -68,6 +68,7 @@ public class ReportService : IReportService
             .OrderByDescending(p => p.QuantitySold)
             .Take(count)
             .ToList();
+        //.OrderByDescending(p => p.Revenue)
 
         return topProducts;
     }
