@@ -19,9 +19,10 @@ public class ReportsController : ControllerBase
 
 
     [HttpGet("monthly-sales")]
-    public async Task<IActionResult> GetMonthlySalesSummary(DateTime startDate, DateTime endDate)
+    public async Task<IActionResult> GetMonthlySalesSummary()
     {
-        var monthlySalesSummary = await _reportService.GetMonthlySalesSummary(startDate, endDate);
+        var monthlySalesSummary = await _reportService.GetMonthlySalesSummary();
+
         return Ok(monthlySalesSummary);
     }
 
@@ -29,6 +30,7 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> GetTopProducts(DateTime startDate, DateTime endDate, int count = 5)
     {
         var topProducts = await _reportService.GetTopProducts(startDate, endDate, count);
+
         return Ok(topProducts);
     }
 
@@ -36,6 +38,7 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> GetPaymentMethodSummary(DateTime startDate, DateTime endDate)
     {
         var paymentMethodSummary = await _reportService.GetPaymentMethodSummary(startDate, endDate);
+
         return Ok(paymentMethodSummary);
     }
 
@@ -43,6 +46,7 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> GetTopCustomers(DateTime startDate, DateTime endDate)
     {
         var topCustomers = await _reportService.GetTopCustomers(startDate, endDate);
+
         return Ok(topCustomers);
     }
 
@@ -50,6 +54,7 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> GetDailySalesSummary(DateTime startDate, DateTime endDate)
     {
         var dailySalesSummary = await _reportService.GetDailySalesSummary(startDate, endDate);
+
         return Ok(dailySalesSummary);
     }
 
@@ -57,19 +62,25 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> GetLowStockProducts()
     {
         var lowStockProducts = await _reportService.GetLowStockProducts();
+
         return Ok(lowStockProducts);
     }
 
-
-
-
     [HttpGet("export/excel")]
-    public async Task<IActionResult> ExportSalesReportToExcel(DateTime startDate, DateTime endDate, string reportType = "summary")
+    public async Task<IActionResult> ExportSalesReportToExcel(string reportType = "summary", DateTime? startDate = null, DateTime? endDate = null)
     {
-        if (startDate > endDate)
-            return BadRequest("Start date must be before or equal to end date.");
+        var requiresDateRange = reportType is "topProducts" or "paymentMethods" or "topCustomers" or "dailySales";
 
-        var fileContent = await _reportService.ExportSalesReportToExcel(startDate, endDate, reportType);
+        if (requiresDateRange)
+        {
+            if (startDate is null || endDate is null)
+                return BadRequest("Start date and end date are required for this report.");
+
+            if (startDate > endDate)
+                return BadRequest("Start date must be before or equal to end date.");
+        }
+
+        var fileContent = await _reportService.ExportSalesReportToExcel(reportType, startDate, endDate);
         var reportTypeFileNamePart = reportType switch
         {
             "topProducts" => "top-products",
@@ -79,7 +90,10 @@ public class ReportsController : ControllerBase
             "lowStock" => "low-stock",
             _ => "summary"
         };
-        var fileName = $"{reportTypeFileNamePart}-report_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.xlsx";
+
+        var fileName = requiresDateRange
+            ? $"{reportTypeFileNamePart}-report_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.xlsx"
+            : $"{reportTypeFileNamePart}-report.xlsx";
 
         return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }

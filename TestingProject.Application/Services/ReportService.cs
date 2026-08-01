@@ -19,15 +19,18 @@ public class ReportService : IReportService
         _productRepository = productRepository;
     }
 
-    public async Task<List<MonthlySalesSummaryDTO>> GetMonthlySalesSummary(DateTime startDate, DateTime endDate)
+    public async Task<List<MonthlySalesSummaryDTO>> GetMonthlySalesSummary()
     {
-        var sales = await _saleRepository.GetSalesBetweenDates(
-            ToUtcStartDate(startDate),
-            ToUtcExclusiveEndDate(endDate));
+        var sales = await _saleRepository.GetAllSalesForSummary();
 
         var monthlySalesSummary = sales
             .Where(sale => sale.Status != SaleStatus.Voided)
-            .GroupBy(sale => new DateTime(sale.SaleDate.Year, sale.SaleDate.Month, 1))
+            .GroupBy(sale =>
+            {
+                var saleDate = ToLocalDate(sale.SaleDate);
+
+                return new DateTime(saleDate.Year, saleDate.Month, 1);
+            })
             .OrderBy(group => group.Key)
             .Select(group => new MonthlySalesSummaryDTO
             {
@@ -94,26 +97,26 @@ public class ReportService : IReportService
         return paymentMethodSummary;
     }
 
-    public async Task<byte[]> ExportSalesReportToExcel(DateTime startDate, DateTime endDate, string reportType)
+    public async Task<byte[]> ExportSalesReportToExcel(string reportType, DateTime? startDate = null, DateTime? endDate = null)
     {
         using var workbook = new XLWorkbook();
 
         switch (reportType)
         {
             case "topProducts":
-                await AddTopProductsSheet(workbook, startDate, endDate);
+                await AddTopProductsSheet(workbook, startDate!.Value, endDate!.Value);
                 break;
 
             case "paymentMethods":
-                await AddPaymentMethodsSheet(workbook, startDate, endDate);
+                await AddPaymentMethodsSheet(workbook, startDate!.Value, endDate!.Value);
                 break;
 
             case "topCustomers":
-                await AddTopCustomersSheet(workbook, startDate, endDate);
+                await AddTopCustomersSheet(workbook, startDate!.Value, endDate!.Value);
                 break;
 
             case "dailySales":
-                await AddDailySalesSheet(workbook, startDate, endDate);
+                await AddDailySalesSheet(workbook, startDate!.Value, endDate!.Value);
                 break;
 
             case "lowStock":
@@ -121,7 +124,7 @@ public class ReportService : IReportService
                 break;
 
             default:
-                await AddSummarySheet(workbook, startDate, endDate);
+                await AddSummarySheet(workbook);
                 break;
         }
 
@@ -161,7 +164,7 @@ public class ReportService : IReportService
 
         var dailySalesSummary = sales
             .Where(sale => sale.Status != SaleStatus.Voided)
-            .GroupBy(sale => sale.SaleDate.Date)
+            .GroupBy(sale => ToLocalDate(sale.SaleDate))
             .Select(group => new DailySalesSummaryDTO
             {
                 Date = group.Key,
@@ -194,9 +197,9 @@ public class ReportService : IReportService
     }
 
 
-    private async Task AddSummarySheet(XLWorkbook workbook, DateTime startDate, DateTime endDate)
+    private async Task AddSummarySheet(XLWorkbook workbook)
     {
-        var monthlySalesSummary = await GetMonthlySalesSummary(startDate, endDate);
+        var monthlySalesSummary = await GetMonthlySalesSummary();
 
         var summarySheet = workbook.Worksheets.Add("Summary");
         summarySheet.Cell(1, 1).Value = "Month";
@@ -330,6 +333,15 @@ public class ReportService : IReportService
         }
 
         sheet.Columns().AdjustToContents();
+    }
+
+    private static DateTime ToLocalDate(DateTime dateTime)
+    {
+        var localDateTime = dateTime.Kind == DateTimeKind.Utc
+            ? dateTime.ToLocalTime()
+            : dateTime;
+
+        return localDateTime.Date;
     }
 
     private static DateTime ToUtcStartDate(DateTime startDate) =>

@@ -9,4 +9,5 @@ public interface ISaleRepository
     Task CreateSale(Sale sale);
     Task UpdateSale(Sale sale);
     Task<List<Sale>> GetSalesBetweenDates(DateTime startDate, DateTime endDate);
+    Task<List<Sale>> GetAllSalesForSummary();
 }                       

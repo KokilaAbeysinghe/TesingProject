@@ -17,7 +17,6 @@ public class ProductCategoriesController : ControllerBase
         _categoryService = categoryService;
     }
 
-    // GET: api/productcategories
     [HttpGet]
     public async Task<IActionResult> GetAllCategories()
     {
@@ -25,7 +24,6 @@ public class ProductCategoriesController : ControllerBase
         return Ok(categories);
     }
 
-    // GET: api/productcategories/paged
     [HttpGet("paged")]
     public async Task<IActionResult> GetCategoriesPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
@@ -33,7 +31,6 @@ public class ProductCategoriesController : ControllerBase
         return Ok(categories);
     }
 
-    // GET: api/productcategories/1
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCategoryById(int id)
     {
@@ -41,7 +38,6 @@ public class ProductCategoriesController : ControllerBase
         return Ok(category);
     }
 
-    // POST: api/productcategories
     [HttpPost]
     public async Task<IActionResult> AddCategory(CreateProductCategoryDTO categoryDTO)
     {
@@ -49,7 +45,6 @@ public class ProductCategoriesController : ControllerBase
         return Ok(new { message = "Category added successfully!" });
     }
 
-    // PUT: api/productcategories/1
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCategory(int id, CreateProductCategoryDTO categoryDTO)
     {
@@ -57,7 +52,6 @@ public class ProductCategoriesController : ControllerBase
         return Ok(new { message = "Category updated successfully!" });
     }
 
-    // DELETE: api/productcategories/1
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCategory(int id)
     {

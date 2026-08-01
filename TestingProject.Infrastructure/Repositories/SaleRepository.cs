@@ -80,4 +80,11 @@ public class SaleRepository : ISaleRepository
             .Where(s => s.SaleDate >= utcStartDate && s.SaleDate < utcEndDate)
             .ToListAsync();
     }
+
+    public async Task<List<Sale>> GetAllSalesForSummary()
+    {
+        return await _context.Sales
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
